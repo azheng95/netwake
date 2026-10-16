@@ -1,16 +1,15 @@
-# LanWake Hub
+# NetWake
 
-面向 Linux NAS（包括飞牛 NAS）的局域网设备发现、设备管理和 Wake-on-LAN 工具。一个镜像、一个容器，内置 Web、LAN 能力和 Caddy HTTPS 代理。本文是 v1.0.1 的自包含部署说明，可供用户或 AI 部署助手直接使用，不需要获取项目源码。
+面向 Linux NAS（包括飞牛 NAS）的局域网设备发现、设备管理和 Wake-on-LAN 工具。一个镜像、一个容器，内置 Web、LAN 能力和 Caddy HTTPS 代理。本文是 v1.0.0 的自包含部署说明，可供用户或 AI 部署助手直接使用，不需要获取项目源码。
 
 ## 1. 部署契约（供 AI 优先读取）
 
-- 镜像：`azheng95/lanwake-hub:1.0.1`；滚动标签：`azheng95/lanwake-hub:latest`。生产部署优先固定版本。
+- 镜像：`azheng95/netwake:1.0.0`；滚动标签：`azheng95/netwake:latest`。生产部署优先固定版本。
 - 当前已发布平台：`linux/amd64`（x86-64）。不要假定已提供 ARM64 镜像。
-- 只有一个服务 `app` 和一个容器 `lanwake-hub`，不要另外部署 Web、Agent 或 Caddy 容器。
+- 只有一个服务 `app` 和一个容器 `netwake`，不要另外部署 Web、Agent 或 Caddy 容器。
 - Linux NAS 正式部署必须使用 `network_mode: host`，保留 `NET_RAW`，不需要 `privileged: true` 或 `NET_ADMIN`，不挂载 Docker socket。
-- host 模式不要填写 `ports:`，自定义监听地址和端口通过容器环境变量设置。
+- host 模式不要填写 `ports:`，自定义端口通过容器环境变量设置。
 - HTTP 默认 `26665`，HTTPS 默认 `26666`，内部 Web 默认仅监听 `127.0.0.1:18080`。三者必须不同且未被占用。
-- `WEB_BIND_ADDRESS` 默认是 `127.0.0.1`，只接受具体的非通配 IPv4；需要局域网访问时改为 NAS 的私有 IPv4，禁止使用 `0.0.0.0`。
 - `TLS_HOST` 是访问用的单个 NAS IPv4 或域名，不含协议、路径或端口。当前启动器不支持 IPv6。
 - `APP_TOKEN` 没有默认值，不会自动生成。必须在主机上生成至少 32 字符的随机令牌，不能使用示例占位符。
 - `/data` 保存 SQLite 设备数据和首次设置状态，`/tls` 保存 TLS/CA 数据，`/config` 保存 Caddy 配置状态，都要持久化。
@@ -37,15 +36,15 @@ ss -lnt
 
 ## 3. 完整 Compose 部署
 
-在 NAS 的持久化存储上创建项目目录，例如 `/vol1/1000/docker/lanwake-hub`（请按实际路径调整）。该目录中准备下面两个文件；飞牛 Docker 的 Compose 项目也可以使用相同配置。
+在 NAS 的持久化存储上创建项目目录，例如 `/vol1/1000/docker/netwake`（请按实际路径调整）。该目录中准备下面两个文件；飞牛 Docker 的 Compose 项目也可以使用相同配置。
 
 ### docker-compose.yml
 
 ```yaml
 services:
   app:
-    image: ${LANWAKE_IMAGE:-azheng95/lanwake-hub:1.0.1}
-    container_name: lanwake-hub
+    image: ${NETWAKE_IMAGE:-azheng95/netwake:1.0.0}
+    container_name: netwake
     restart: unless-stopped
     init: true
     stop_grace_period: 15s
@@ -55,10 +54,9 @@ services:
     cap_add:
       - NET_RAW
     environment:
-      DB_PATH: /data/lanwake.db
+      DB_PATH: /data/netwake.db
       APP_TOKEN: ${APP_TOKEN:?Set APP_TOKEN in .env}
       APP_PORT: ${APP_PORT:-18080}
-      WEB_BIND_ADDRESS: ${WEB_BIND_ADDRESS:-127.0.0.1}
       WEB_HTTP_PORT: ${WEB_HTTP_PORT:-26665}
       WEB_HTTPS_PORT: ${WEB_HTTPS_PORT:-26666}
       TLS_HOST: ${TLS_HOST:?Set TLS_HOST in .env}
@@ -78,9 +76,8 @@ volumes:
 ### .env
 
 ```dotenv
-LANWAKE_IMAGE=azheng95/lanwake-hub:1.0.1
+NETWAKE_IMAGE=azheng95/netwake:1.0.0
 APP_TOKEN=REPLACE_WITH_YOUR_RANDOM_TOKEN
-WEB_BIND_ADDRESS=192.168.0.111
 TLS_HOST=192.168.0.111
 WEB_HTTP_PORT=26665
 WEB_HTTPS_PORT=26666
@@ -121,16 +118,15 @@ HTTP 和 HTTPS 并行提供服务，不会自动重定向。两种协议必须�
 | 变量 | 默认值/要求 | 含义 |
 | --- | --- | --- |
 | `APP_TOKEN` | 必填，无默认值 | 至少 32 字符的随机管理令牌；`replace-with-` 开头的值也会被拒绝 |
-| `WEB_BIND_ADDRESS` | `127.0.0.1` | Caddy 监听的具体 IPv4；局域网部署填写 NAS 私有 IPv4，禁止 `0.0.0.0` |
 | `WEB_HTTP_PORT` | `26665` | HTTP 监听端口 |
 | `WEB_HTTPS_PORT` | `26666` | HTTPS 监听端口 |
 | `APP_PORT` | `18080` | 仅回环监听的内部 Web 端口，仍会占用 NAS 主机端口 |
 | `TLS_HOST` | 镜像默认 `localhost` | NAS 上务必设为实际访问 IP/域名，证书按此签发 |
 | `SCAN_INTERFACE` | 空 | LAN 网卡名；空值使用 Scapy 默认网卡 |
 | `DEFAULT_CIDR` | `192.168.0.0/24` | 默认扫描范围，不是自动扫描整个家庭网络 |
-| `AGENT_NAME` | 镜像默认 `lanwake-agent` | LAN 模块显示名称，不代表独立容器 |
-| `DB_PATH` | `/data/lanwake.db` | SQLite 路径，建议保留 |
-| `LANWAKE_IMAGE` | 由 Compose 模板定义 | 镜像标签选择，不是程序运行参数 |
+| `AGENT_NAME` | 镜像默认 `netwake-agent` | LAN 模块显示名称，不代表独立容器 |
+| `DB_PATH` | `/data/netwake.db` | SQLite 路径，建议保留 |
+| `NETWAKE_IMAGE` | 由 Compose 模板定义 | 镜像标签选择，不是程序运行参数 |
 
 端口取值范围为 1 到 65535；本模板收紧了权限，建议使用大于 1024 的空闲端口。旧 Compose 的 `WEB_PORT` 曾作为 HTTP 端口回退；新部署只使用明确的 `WEB_HTTP_PORT`，不要依赖旧别名。不再需要 `AGENT_TOKEN` 或 `AGENT_URL`。
 
@@ -143,12 +139,12 @@ HTTP 和 HTTPS 并行提供服务，不会自动重定向。两种协议必须�
 默认是 Caddy 内部 CA 证书，并非公有 CA 证书。连接会加密，但访问设备未信任 CA 时会提示证书不受信任；不能宣称浏览器默认信任或自动取得公网证书。通过可信渠道导出公开根证书并安装到客户端信任存储：
 
 ```bash
-docker cp lanwake-hub:/tls/caddy/pki/authorities/local/root.crt ./lanwake-root.crt
+docker cp netwake:/tls/caddy/pki/authorities/local/root.crt ./netwake-root.crt
 ```
 
 只导出 `root.crt`，不要分享 `root.key` 或整个 `/tls` 目录。TLS/CA 卷备份含私钥，应加密保存。若需使用自有证书，可自定义 Caddyfile 并挂载证书；当前默认镜像不会自动使用 NAS 证书。
 
-建议仅在受信任内网使用，远程管理通过 VPN 或受保护的反向代理，不要直接映射公网端口。HTTP 会明文传输令牌。将 `WEB_BIND_ADDRESS` 设为具体的 NAS 私有 IPv4 后，Caddy 不会监听其他网卡；仍建议通过主机防火墙限制访问来源。内部 Web 在主机回环上，NAS 本机其他进程也可访问。
+建议仅在受信任内网使用，远程管理通过 VPN 或受保护的反向代理，不要直接映射公网端口。HTTP 会明文传输令牌；仍建议通过主机防火墙限制访问来源。内部 Web 在主机回环上，NAS 本机其他进程也可访问。
 
 ## 6. 设备发现与唤醒
 
@@ -177,7 +173,7 @@ ARP 只能发现当前响应的在线设备，不能发现从未保存过的关�
 | POST | `/api/devices/{id}/probe` | 探测保存设备的 IP，无需请求体 |
 | GET | `/api/activity` | 操作日志 |
 
-Web 和兼容 Agent 默认关闭 `/openapi.json`、`/docs` 和 `/redoc`，并由 Caddy 入口再次返回 404，避免把管理接口结构暴露给公网。应用默认只监听回环地址；局域网部署必须显式设置 `WEB_BIND_ADDRESS` 为 NAS 私有 IPv4。
+Web 和兼容 Agent 默认关闭 `/openapi.json`、`/docs` 和 `/redoc`，并由 Caddy 入口再次返回 404，避免把管理接口结构暴露给公网。
 
 默认关闭 `/openapi.json`、`/docs` 和 `/redoc`，避免把管理接口结构暴露给公网。MAC 支持冒号、短横线或 12 位十六进制形式，必须是有效单播地址；IP 和广播地址限制在允许的私网/链路本地范围，WoL 广播另允许 `255.255.255.255`。重复 MAC 返回 409，未授权返回 401，输入校验失败通常返回 422。
 
@@ -193,7 +189,7 @@ docker compose logs --tail=100 app
 curl -fsS http://127.0.0.1:26665/healthz
 ```
 
-HTTPS 可使用已导出的 CA 验证，例如 `curl --cacert ./lanwake-root.crt https://192.168.0.111:26666/healthz`，地址必须与 `TLS_HOST` 匹配。端口改过时相应替换。日志可能包含网络信息，分享前请脱敏。
+HTTPS 可使用已导出的 CA 验证，例如 `curl --cacert ./netwake-root.crt https://192.168.0.111:26666/healthz`，地址必须与 `TLS_HOST` 匹配。端口改过时相应替换。日志可能包含网络信息，分享前请脱敏。
 
 | 现象 | 检查点 |
 | --- | --- |
@@ -210,7 +206,7 @@ Windows/macOS Docker Desktop 的 bridge 网络可用于查看管理页，但不�
 
 ## 9. 更新、备份、迁移和令牌重置
 
-更新前备份 `.env`（保密）、Compose 文件、`data` 和两个 Caddy 命名卷。SQLite 一致性备份应先停止应用再备份整个数据目录，不要在运行中只复制 `lanwake.db` 而忽略 WAL。命名卷需另行完整备份，NAS 快照或 Docker 卷备份均可。备份完成后恢复运行。
+更新前备份 `.env`（保密）、Compose 文件、`data` 和两个 Caddy 命名卷。SQLite 一致性备份应先停止应用再备份整个数据目录，不要在运行中只复制 `netwake.db` 而忽略 WAL。命名卷需另行完整备份，NAS 快照或 Docker 卷备份均可。备份完成后恢复运行。
 
 ```bash
 docker compose stop app
@@ -218,7 +214,7 @@ docker compose stop app
 docker compose up -d
 ```
 
-需要更新时修改 `LANWAKE_IMAGE`，执行：
+需要更新时修改 `NETWAKE_IMAGE`，执行：
 
 ```bash
 docker compose pull
@@ -226,7 +222,7 @@ docker compose up -d
 docker compose ps
 ```
 
-`latest` 可能随发布改变，固定 `1.0.1` 不会自动跟随新版本。回滚镜像前确认数据库兼容性；需要时恢复与该版本配套的数据备份。不要把回滚等同于恢复数据库。
+`latest` 可能随发布改变，固定 `1.0.0` 不会自动跟随新版本。回滚镜像前确认数据库兼容性；需要时恢复与该版本配套的数据备份。不要把回滚等同于恢复数据库。
 
 从旧 Web + Agent + Caddy 架构迁移：先备份，保留同一项目名、原 `./data` 和证书卷，改用本文单服务 Compose，再执行 `docker compose up -d --remove-orphans`。旧镜像仓库不再使用，无需配置 `AGENT_URL`/`AGENT_TOKEN`。
 
@@ -237,11 +233,11 @@ docker compose ps
 AI 或自动化部署助手应按以下顺序执行，并在失败时停止，不要猜测 NAS 网卡、IP 或令牌：
 
 ```bash
-mkdir -p /path/to/lanwake-hub/data
-cd /path/to/lanwake-hub
+mkdir -p /path/to/netwake/data
+cd /path/to/netwake
 cp .env.example .env
 openssl rand -base64 36
-# 将输出写入 .env 的 APP_TOKEN；按实际 NAS 私有 IPv4 修改 WEB_BIND_ADDRESS 和 TLS_HOST
+# 将输出写入 .env 的 APP_TOKEN；按实际 NAS 地址修改 TLS_HOST
 docker compose config
 docker compose pull
 docker compose up -d

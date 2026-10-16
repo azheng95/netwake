@@ -11,14 +11,14 @@ from .services.probe import probe_host
 from .services.wol import send_magic_packet
 
 
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.0.0"
 AGENT_TOKEN = os.getenv("AGENT_TOKEN", "")
-AGENT_NAME = os.getenv("AGENT_NAME", "lanwake-agent")
+AGENT_NAME = os.getenv("AGENT_NAME", "netwake-agent")
 DEFAULT_INTERFACE = os.getenv("SCAN_INTERFACE", "").strip()
 PORT = int(os.getenv("PORT", "8081"))
 
 app = FastAPI(
-    title="LanWake Linux Agent",
+    title="NetWake Linux Agent",
     version=APP_VERSION,
     openapi_url=None,
     docs_url=None,

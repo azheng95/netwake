@@ -7,13 +7,13 @@
 	}
 }
 
-http://{$WEB_BIND_ADDRESS}:{$WEB_HTTP_PORT} {
+http://:{$WEB_HTTP_PORT} {
 	@api_docs path /openapi.json /docs /docs/* /redoc /redoc/*
 	respond @api_docs 404
 	reverse_proxy 127.0.0.1:{$APP_PORT}
 }
 
-https://{$WEB_BIND_ADDRESS}:{$WEB_HTTPS_PORT} {
+https://{$TLS_HOST}:{$WEB_HTTPS_PORT} {
 	tls internal
 	@api_docs path /openapi.json /docs /docs/* /redoc /redoc/*
 	respond @api_docs 404

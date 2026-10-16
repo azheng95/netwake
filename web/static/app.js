@@ -3,7 +3,7 @@ const state = {
   activity: [],
   config: null,
   interfaces: [],
-  token: localStorage.getItem("lanwake-token") || "",
+  token: localStorage.getItem("netwake-token") || "",
 };
 
 const $ = (id) => document.getElementById(id);
@@ -179,7 +179,7 @@ async function copyInitialToken() {
 async function confirmInitialTokenSaved() {
   try {
     await api("/api/setup/token-saved", { method: "POST" });
-    localStorage.setItem("lanwake-token", state.token);
+    localStorage.setItem("netwake-token", state.token);
     $("initialTokenDialog").close();
     await loadAll();
   } catch (error) {
@@ -303,7 +303,7 @@ tokenInput.addEventListener("input", () => {
 });
 async function connectWithToken() {
   state.token = tokenInput.value.trim();
-  localStorage.setItem("lanwake-token", state.token);
+  localStorage.setItem("netwake-token", state.token);
   window.clearTimeout(tokenInput.refreshTimer);
   await loadAll();
 }

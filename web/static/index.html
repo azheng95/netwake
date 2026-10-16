@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LanWake Hub</title>
+    <title>NetWake</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div class="shell">
       <header class="topbar">
         <div>
-          <h1>LanWake <span>设备管理</span></h1>
+          <h1>NetWake <span>设备管理</span></h1>
         </div>
         <div class="top-actions">
           <label class="token-field" id="tokenField">
@@ -105,7 +105,7 @@
         </div>
         <p class="dialog-copy">本页面不能远程重置令牌。请在运行 Docker 的部署主机本地操作，修改项目 .env 中的 APP_TOKEN 为新的随机值（至少 32 个字符），再重建 Web 容器。</p>
         <pre class="command-block">docker compose up -d --force-recreate app</pre>
-        <p class="dialog-copy">Windows 项目目录：<code>D:\DockerProjects\lanwake-hub</code><br />Linux / NAS：先进入项目目录，再执行上面的命令。</p>
+        <p class="dialog-copy">Windows 项目目录：<code>D:\DockerProjects\netwake</code><br />Linux / NAS：先进入项目目录，再执行上面的命令。</p>
         <p class="dialog-copy">容器重启后，使用新令牌登录。</p>
       </div>
     </dialog>

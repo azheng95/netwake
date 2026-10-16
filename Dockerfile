@@ -25,7 +25,7 @@ COPY web/app ./web/app
 COPY web/static ./web/static
 COPY --from=caddy /usr/bin/caddy /usr/bin/caddy
 RUN setcap -r /usr/bin/caddy
-COPY proxy/Caddyfile /etc/lanwake/Caddyfile
+COPY proxy/Caddyfile /etc/netwake/Caddyfile
 COPY runtime.py .
 
 EXPOSE 26665 26666

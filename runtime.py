@@ -22,15 +22,6 @@ def configure() -> None:
         ports.append(int(value))
     if len(set(ports)) != len(ports):
         raise ValueError("HTTP, HTTPS and internal APP_PORT must be different")
-    bind_address = os.getenv("WEB_BIND_ADDRESS", "127.0.0.1").strip()
-    try:
-        address = ipaddress.ip_address(bind_address)
-    except ValueError as exc:
-        raise ValueError("WEB_BIND_ADDRESS must be an IPv4 address") from exc
-    if address.version != 4 or address.is_unspecified or address.is_multicast or address.is_reserved:
-        raise ValueError("WEB_BIND_ADDRESS must be a specific non-wildcard IPv4 address")
-    os.environ["WEB_BIND_ADDRESS"] = bind_address
-
     host = os.getenv("TLS_HOST", "localhost")
     try:
         address = ipaddress.ip_address(host)
@@ -62,7 +53,7 @@ def main() -> int:
             "--host", "127.0.0.1", "--port", os.environ["APP_PORT"],
         ]))
         children.append(subprocess.Popen([
-            "caddy", "run", "--config", "/etc/lanwake/Caddyfile", "--adapter", "caddyfile",
+            "caddy", "run", "--config", "/etc/netwake/Caddyfile", "--adapter", "caddyfile",
         ]))
         while not stopping:
             for child in children:

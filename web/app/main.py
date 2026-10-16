@@ -7,8 +7,8 @@ from .config import STATIC_DIR
 from .database import initialize
 
 app = FastAPI(
-    title="LanWake Hub",
-    version="1.0.1",
+    title="NetWake",
+    version="1.0.0",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,

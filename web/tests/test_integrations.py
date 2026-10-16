@@ -13,7 +13,7 @@ class IntegratedLanTests(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             status = agent_request("GET", "/healthz")
         self.assertTrue(status["ok"])
-        self.assertEqual(status["version"], "1.0.1")
+        self.assertEqual(status["version"], "1.0.0")
 
     def test_interfaces_call_local_backend(self):
         with patch("web.app.integrations.list_interfaces", return_value=[]) as backend:
@@ -46,8 +46,6 @@ class IntegratedLanTests(unittest.TestCase):
             {"WEB_HTTP_PORT": "0"},
             {"WEB_HTTPS_PORT": "not-a-port"},
             {"WEB_HTTP_PORT": "26666"},
-            {"WEB_BIND_ADDRESS": "0.0.0.0"},
-            {"WEB_BIND_ADDRESS": "not-an-ip"},
             {"TLS_HOST": "https://192.168.0.111"},
             {"TLS_HOST": "localhost\nadmin off"},
         ):
@@ -60,11 +58,9 @@ class IntegratedLanTests(unittest.TestCase):
             runtime.configure()
             self.assertEqual(os.environ["WEB_HTTP_PORT"], "26665")
             self.assertEqual(os.environ["APP_PORT"], "18080")
-            self.assertEqual(os.environ["WEB_BIND_ADDRESS"], "127.0.0.1")
         with patch.dict(os.environ, {
             "WEB_HTTP_PORT": "27665", "WEB_HTTPS_PORT": "27666",
             "TLS_HOST": "192.168.0.111",
         }, clear=True):
             runtime.configure()
             self.assertEqual(os.environ["WEB_HTTPS_PORT"], "27666")
-            self.assertEqual(os.environ["WEB_BIND_ADDRESS"], "127.0.0.1")

@@ -10,7 +10,7 @@ from web.app.api import system
 from web.app import main
 
 
-class LanWakeApiTests(unittest.TestCase):
+class NetWakeApiTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.db_path = Path(self.temp_dir.name) / "test.db"
@@ -43,7 +43,7 @@ class LanWakeApiTests(unittest.TestCase):
         config = self.client.get("/api/config")
 
         self.assertEqual(page.status_code, 200)
-        self.assertIn("LanWake Hub", page.text)
+        self.assertIn("NetWake", page.text)
         self.assertTrue(config.json()["auth_enabled"])
 
     def test_api_documentation_is_disabled(self) -> None:

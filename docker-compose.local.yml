@@ -2,5 +2,5 @@ services:
   app:
     network_mode: bridge
     ports:
-      - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_HTTP_PORT:-26665}:${WEB_HTTP_PORT:-26665}"
-      - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_HTTPS_PORT:-26666}:${WEB_HTTPS_PORT:-26666}"
+      - "${WEB_HTTP_PORT:-26665}:${WEB_HTTP_PORT:-26665}"
+      - "${WEB_HTTPS_PORT:-26666}:${WEB_HTTPS_PORT:-26666}"
