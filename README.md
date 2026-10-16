@@ -53,7 +53,7 @@ ALLOW_INITIAL_TOKEN_ENDPOINT=false
 AGENT_NAME=nas-lan-agent
 SCAN_INTERFACE=eth0
 DEFAULT_CIDR=192.168.0.0/24
-LANWAKE_IMAGE=azheng95/lanwake-hub:1.0.0
+LANWAKE_IMAGE=azheng95/lanwake-hub:1.0.1
 ```
 
 网卡名请以 NAS 上 `ip link` 的实际结果为准，例如 `eth0`、`bond0` 或 `br0`。
@@ -79,7 +79,7 @@ HTTPS 默认由 Caddy 内部 CA 签发证书，访问会加密，但浏览器/�
 docker cp lanwake-hub:/tls/caddy/pki/authorities/local/root.crt ./lanwake-root.crt
 ```
 
-从原版迁移时保留 `./data` 和证书卷，执行 `docker compose up -d --remove-orphans` 移除旧 Web、Agent 和代理容器。旧 `AGENT_TOKEN`、`AGENT_URL` 可删除；新部署请显式设置 `WEB_BIND_ADDRESS`，不要依赖旧的 `WEB_PORT` 别名。源码构建可执行 `docker build -t azheng95/lanwake-hub:1.0.0 .`。
+从原版迁移时保留 `./data` 和证书卷，执行 `docker compose up -d --remove-orphans` 移除旧 Web、Agent 和代理容器。旧 `AGENT_TOKEN`、`AGENT_URL` 可删除；新部署请显式设置 `WEB_BIND_ADDRESS`，不要依赖旧的 `WEB_PORT` 别名。源码构建可执行 `docker build -t azheng95/lanwake-hub:1.0.1 .`。
 
 输入 `APP_TOKEN` 登录管理端。
 

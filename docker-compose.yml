@@ -1,6 +1,6 @@
 services:
   app:
-    image: ${LANWAKE_IMAGE:-azheng95/lanwake-hub:1.0.0}
+    image: ${LANWAKE_IMAGE:-azheng95/lanwake-hub:1.0.1}
     container_name: lanwake-hub
     restart: unless-stopped
     init: true

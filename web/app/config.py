@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 DB_PATH = os.getenv("DB_PATH", "/data/lanwake.db")
 APP_TOKEN = os.getenv("APP_TOKEN", "")
 AGENT_NAME = os.getenv("AGENT_NAME", "lanwake-agent")

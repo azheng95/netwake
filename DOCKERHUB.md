@@ -1,10 +1,10 @@
 # LanWake Hub
 
-面向 Linux NAS（包括飞牛 NAS）的局域网设备发现、设备管理和 Wake-on-LAN 工具。一个镜像、一个容器，内置 Web、LAN 能力和 Caddy HTTPS 代理。本文是 v1.0.0 的自包含部署说明，可供用户或 AI 部署助手直接使用，不需要获取项目源码。
+面向 Linux NAS（包括飞牛 NAS）的局域网设备发现、设备管理和 Wake-on-LAN 工具。一个镜像、一个容器，内置 Web、LAN 能力和 Caddy HTTPS 代理。本文是 v1.0.1 的自包含部署说明，可供用户或 AI 部署助手直接使用，不需要获取项目源码。
 
 ## 1. 部署契约（供 AI 优先读取）
 
-- 镜像：`azheng95/lanwake-hub:1.0.0`；滚动标签：`azheng95/lanwake-hub:latest`。生产部署优先固定版本。
+- 镜像：`azheng95/lanwake-hub:1.0.1`；滚动标签：`azheng95/lanwake-hub:latest`。生产部署优先固定版本。
 - 当前已发布平台：`linux/amd64`（x86-64）。不要假定已提供 ARM64 镜像。
 - 只有一个服务 `app` 和一个容器 `lanwake-hub`，不要另外部署 Web、Agent 或 Caddy 容器。
 - Linux NAS 正式部署必须使用 `network_mode: host`，保留 `NET_RAW`，不需要 `privileged: true` 或 `NET_ADMIN`，不挂载 Docker socket。
@@ -44,7 +44,7 @@ ss -lnt
 ```yaml
 services:
   app:
-    image: ${LANWAKE_IMAGE:-azheng95/lanwake-hub:1.0.0}
+    image: ${LANWAKE_IMAGE:-azheng95/lanwake-hub:1.0.1}
     container_name: lanwake-hub
     restart: unless-stopped
     init: true
@@ -78,7 +78,7 @@ volumes:
 ### .env
 
 ```dotenv
-LANWAKE_IMAGE=azheng95/lanwake-hub:1.0.0
+LANWAKE_IMAGE=azheng95/lanwake-hub:1.0.1
 APP_TOKEN=REPLACE_WITH_YOUR_RANDOM_TOKEN
 WEB_BIND_ADDRESS=192.168.0.111
 TLS_HOST=192.168.0.111
@@ -226,7 +226,7 @@ docker compose up -d
 docker compose ps
 ```
 
-`latest` 可能随发布改变，固定 `1.0.0` 不会自动跟随新版本。回滚镜像前确认数据库兼容性；需要时恢复与该版本配套的数据备份。不要把回滚等同于恢复数据库。
+`latest` 可能随发布改变，固定 `1.0.1` 不会自动跟随新版本。回滚镜像前确认数据库兼容性；需要时恢复与该版本配套的数据备份。不要把回滚等同于恢复数据库。
 
 从旧 Web + Agent + Caddy 架构迁移：先备份，保留同一项目名、原 `./data` 和证书卷，改用本文单服务 Compose，再执行 `docker compose up -d --remove-orphans`。旧镜像仓库不再使用，无需配置 `AGENT_URL`/`AGENT_TOKEN`。
 
