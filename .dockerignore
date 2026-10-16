@@ -3,6 +3,9 @@
 !.env.example
 data/
 certs/
+*.key
+*.pem
+*.p12
 .git/
 **/__pycache__/
 **/*.pyc

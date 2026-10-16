@@ -2,6 +2,11 @@ data/*.db
 data/*.db-*
 data/*.log
 .env
+.env.*
+!.env.example
+certs/
+*.key
+*.pem
 __pycache__/
 .venv/
 *.pyc

@@ -4,6 +4,8 @@ NetWake 是一个面向家庭 NAS 和小型办公室的局域网设备发现、�
 
 面向用户和 AI 部署助手的独立镜像部署说明见 [DOCKERHUB.md](DOCKERHUB.md)，包含不依赖源码的 Compose、参数表、API 和排错约定。
 
+> **安全提醒：** 不要把账号密码、`APP_TOKEN`/`AGENT_TOKEN`、API 密钥、TLS/CA 私钥、真实设备台账、生产 `.env` 或包含这些内容的日志/截图提交到 GitHub，也不要打包或发布到 Docker Hub。请先阅读 [SECURITY.md](SECURITY.md)，并只在 `.env.example` 中保留占位符。
+
 ## 架构
 
 ```text

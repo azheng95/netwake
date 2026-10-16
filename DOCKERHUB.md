@@ -2,6 +2,8 @@
 
 面向 Linux NAS（包括飞牛 NAS）的局域网设备发现、设备管理和 Wake-on-LAN 工具。一个镜像、一个容器，内置 Web、LAN 能力和 Caddy HTTPS 代理。本文是 v1.0.0 的自包含部署说明，可供用户或 AI 部署助手直接使用，不需要获取项目源码。
 
+> **发布前安全提醒：** Docker Hub 镜像、描述、README、构建日志和示例配置都不得包含账号密码、`APP_TOKEN`/`AGENT_TOKEN`、API 密钥、TLS/CA 私钥、生产 `.env`、真实设备台账或敏感日志。真实凭据只能保存在部署主机或密码管理器中；源码仓库和镜像构建上下文也必须保持干净。完整处理流程见项目 [SECURITY.md](https://github.com/azheng95/netwake/blob/main/SECURITY.md)。
+
 ## 1. 部署契约（供 AI 优先读取）
 
 - 镜像：`azheng95/netwake:1.0.0`；滚动标签：`azheng95/netwake:latest`。生产部署优先固定版本。
@@ -15,7 +17,7 @@
 - `/data` 保存 SQLite 设备数据和首次设置状态，`/tls` 保存 TLS/CA 数据，`/config` 保存 Caddy 配置状态，都要持久化。
 - 扫描和 WoL 面向同一二层局域网/VLAN，路由器能看到设备不代表容器能跨 VLAN 发现设备。
 - 文中 `192.168.0.111`、网卡名和目录均为示例，部署前应读取目标 NAS 的实际值，不能直接猜测。
-- 不要将令牌、CA 私钥、真实设备台账或主机日志发布到公开说明中。
+- 不要将账号密码、令牌、API 密钥、CA/TLS 私钥、真实设备台账、生产 `.env`、主机日志或包含这些内容的截图发布到 GitHub、Docker Hub 或公开说明中。
 
 ## 2. 部署前检查
 
