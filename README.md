@@ -2,7 +2,7 @@
 
 NetWake 是一个面向家庭 NAS 和小型办公室的局域网设备发现、设备台账和 Wake-on-LAN 管理工具。Web 管理端和 LAN Agent 能力打包在同一个应用镜像中，适合部署在能访问目标网段的 Linux NAS 上。
 
-面向用户和 AI 部署助手的独立镜像部署说明见 [DOCKERHUB.md](DOCKERHUB.md)，包含不依赖源码的 Compose、参数表、API 和排错约定。
+面向用户和 AI 部署助手的独立镜像部署说明见 [DOCKERHUB.md](DOCKERHUB.md)，它按当前单容器实现给出部署前事实采集、Compose、验收、API 自动化和排错流程。
 
 > **安全提醒：** 不要把账号密码、`APP_TOKEN`/`AGENT_TOKEN`、API 密钥、TLS/CA 私钥、真实设备台账、生产 `.env` 或包含这些内容的日志/截图提交到 GitHub，也不要打包或发布到 Docker Hub。请先阅读 [SECURITY.md](SECURITY.md)，并只在 `.env.example` 中保留占位符。
 
