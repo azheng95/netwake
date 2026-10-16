@@ -8,7 +8,7 @@ from .database import initialize
 
 app = FastAPI(
     title="NetWake",
-    version="1.0.0",
+    version="1.0.1",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,

@@ -2,8 +2,8 @@
 
 本文是 NetWake 当前版本的自包含部署合同，面向 Linux NAS、Docker Compose 和 AI 部署助手。正式 NAS 部署使用 host 网络的 `netwake` 主容器，并使用 `netwake-link` 代理容器发布公开端口；完整的代理拓扑和验收命令见 [PROXY_DEPLOYMENT.md](PROXY_DEPLOYMENT.md)。
 
-> 版本基线：1.0.0
-> 默认镜像：azheng95/netwake:1.0.0
+> 版本基线：1.0.1
+> 默认镜像：azheng95/netwake:1.0.1
 > 当前发布平台：linux/amd64（x86-64）
 
 ## 0. 给 AI 的执行规则
@@ -94,7 +94,7 @@ docker compose up -d
 创建 .env，并只在 NAS 主机上编辑：
 
 ~~~dotenv
-NETWAKE_IMAGE=azheng95/netwake:1.0.0
+NETWAKE_IMAGE=azheng95/netwake:1.0.1
 APP_TOKEN=在主机本地生成的随机令牌
 TLS_HOST=192.168.0.111
 PUBLIC_HTTP_PORT=26665

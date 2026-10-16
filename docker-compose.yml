@@ -1,6 +1,6 @@
 services:
   app:
-    image: ${NETWAKE_IMAGE:-azheng95/netwake:1.0.0}
+    image: ${NETWAKE_IMAGE:-azheng95/netwake:1.0.1}
     container_name: netwake
     restart: unless-stopped
     init: true

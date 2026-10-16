@@ -11,7 +11,7 @@ from .services.probe import probe_host
 from .services.wol import send_magic_packet
 
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 AGENT_TOKEN = os.getenv("AGENT_TOKEN", "")
 AGENT_NAME = os.getenv("AGENT_NAME", "netwake-agent")
 DEFAULT_INTERFACE = os.getenv("SCAN_INTERFACE", "").strip()

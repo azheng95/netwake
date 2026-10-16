@@ -13,7 +13,7 @@ class IntegratedLanTests(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             status = agent_request("GET", "/healthz")
         self.assertTrue(status["ok"])
-        self.assertEqual(status["version"], "1.0.0")
+        self.assertEqual(status["version"], "1.0.1")
 
     def test_interfaces_call_local_backend(self):
         with patch("web.app.integrations.list_interfaces", return_value=[]) as backend:
