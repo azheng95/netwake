@@ -1,6 +1,6 @@
 # NetWake：AI 可执行部署说明
 
-本文是 NetWake 当前版本的自包含部署合同，面向 Linux NAS、Docker Compose 和 AI 部署助手。它描述的是仓库当前实现，不要求再部署独立的 Web、Agent 或 Caddy 容器。
+本文是 NetWake 当前版本的自包含部署合同，面向 Linux NAS、Docker Compose 和 AI 部署助手。正式 NAS 部署使用 host 网络的 `netwake` 主容器，并使用 `netwake-link` 代理容器发布公开端口；完整的代理拓扑和验收命令见 [PROXY_DEPLOYMENT.md](PROXY_DEPLOYMENT.md)。
 
 > 版本基线：1.0.0
 > 默认镜像：azheng95/netwake:1.0.0
@@ -80,43 +80,14 @@ cd /volume1/docker/netwake
 
 ### 3.1 docker-compose.yml
 
-使用仓库中的 docker-compose.yml，或创建内容完全等价的文件：
+必须使用仓库中的完整 `docker-compose.yml`，其中包含 `netwake` 和 `netwake-link` 两个服务；不要手工改回旧版单服务 Compose：
 
-~~~yaml
-services:
-  app:
-    image: \${NETWAKE_IMAGE:-azheng95/netwake:1.0.0}
-    container_name: netwake
-    restart: unless-stopped
-    init: true
-    stop_grace_period: 15s
-    network_mode: host
-    cap_drop:
-      - ALL
-    cap_add:
-      - NET_RAW
-    environment:
-      DB_PATH: /data/netwake.db
-      APP_TOKEN: \${APP_TOKEN:?Set APP_TOKEN in .env}
-      ALLOW_INITIAL_TOKEN_ENDPOINT: \${ALLOW_INITIAL_TOKEN_ENDPOINT:-false}
-      APP_PORT: \${APP_PORT:-18080}
-      WEB_HTTP_PORT: \${WEB_HTTP_PORT:-26665}
-      WEB_HTTPS_PORT: \${WEB_HTTPS_PORT:-26666}
-      TLS_HOST: \${TLS_HOST:?Set TLS_HOST in .env}
-      AGENT_NAME: \${AGENT_NAME:-netwake-agent}
-      SCAN_INTERFACE: \${SCAN_INTERFACE:-}
-      DEFAULT_CIDR: \${DEFAULT_CIDR:-192.168.0.0/24}
-    volumes:
-      - ./data:/data
-      - caddy_data:/tls
-      - caddy_config:/config
-
-volumes:
-  caddy_data:
-  caddy_config:
+~~~bash
+docker compose config --quiet
+docker compose up -d
 ~~~
 
-与仓库旧版 Compose 合并前，确认没有重复的 web、agent、caddy 服务，也没有遗留 AGENT_URL、AGENT_TOKEN 或 ports:。
+`netwake` 保持 `network_mode: host` 且不配置 `ports:`；`netwake-link` 使用 bridge 网络发布 `26665/26666`，因此飞牛 Docker 界面中的可点击连接显示在代理容器行。完整拓扑和验收命令见 [PROXY_DEPLOYMENT.md](PROXY_DEPLOYMENT.md)。
 
 ### 3.2 .env
 
@@ -126,8 +97,10 @@ volumes:
 NETWAKE_IMAGE=azheng95/netwake:1.0.0
 APP_TOKEN=在主机本地生成的随机令牌
 TLS_HOST=192.168.0.111
-WEB_HTTP_PORT=26665
-WEB_HTTPS_PORT=26666
+PUBLIC_HTTP_PORT=26665
+PUBLIC_HTTPS_PORT=26666
+BACKEND_HTTP_PORT=18081
+BACKEND_HTTPS_PORT=18082
 APP_PORT=18080
 ALLOW_INITIAL_TOKEN_ENDPOINT=false
 AGENT_NAME=nas-lan-agent

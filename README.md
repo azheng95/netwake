@@ -2,7 +2,7 @@
 
 NetWake 是一个面向家庭 NAS 和小型办公室的局域网设备发现、设备台账和 Wake-on-LAN 管理工具。Web 管理端和 LAN Agent 能力打包在同一个应用镜像中，适合部署在能访问目标网段的 Linux NAS 上。
 
-面向用户和 AI 部署助手的独立镜像部署说明见 [DOCKERHUB.md](DOCKERHUB.md)，它按当前单容器实现给出部署前事实采集、Compose、验收、API 自动化和排错流程。
+面向用户和 AI 部署助手的独立镜像部署说明见 [DOCKERHUB.md](DOCKERHUB.md)。正式 Linux NAS 部署使用 host 网络保留局域网扫描能力，并通过 [PROXY_DEPLOYMENT.md](PROXY_DEPLOYMENT.md) 中的 `netwake-link` 代理容器提供 Docker 管理器可识别的端口链接。
 
 > **安全提醒：** 不要把账号密码、`APP_TOKEN`/`AGENT_TOKEN`、API 密钥、TLS/CA 私钥、真实设备台账、生产 `.env` 或包含这些内容的日志/截图提交到 GitHub，也不要打包或发布到 Docker Hub。请先阅读 [SECURITY.md](SECURITY.md)，并只在 `.env.example` 中保留占位符。
 
@@ -12,7 +12,10 @@ NetWake 是一个面向家庭 NAS 和小型办公室的局域网设备发现、�
 浏览器
    │ HTTP / HTTPS
    ▼
-NetWake 单容器
+netwake-link（bridge，公开端口映射）
+   │
+   ▼
+NetWake 主容器（host network）
    ├─ Caddy（TLS 终止、反向代理）
    │ 本机 HTTP
    ▼
@@ -46,8 +49,11 @@ cp .env.example .env
 编辑 `.env`，修改管理令牌、NAS 地址和扫描网卡：
 
 ```dotenv
-WEB_HTTP_PORT=26665
-WEB_HTTPS_PORT=26666
+PUBLIC_HTTP_PORT=26665
+PUBLIC_HTTPS_PORT=26666
+BACKEND_HTTP_PORT=18081
+BACKEND_HTTPS_PORT=18082
+APP_PORT=18080
 TLS_HOST=192.168.0.111
 APP_TOKEN=替换为至少32字符的随机管理令牌
 ALLOW_INITIAL_TOKEN_ENDPOINT=false
@@ -59,7 +65,7 @@ NETWAKE_IMAGE=azheng95/netwake:1.0.0
 
 网卡名请以 NAS 上 `ip link` 的实际结果为准，例如 `eth0`、`bond0` 或 `br0`。
 
-启动单容器（Web、LAN 和 HTTPS 代理均在镜像内）：
+启动主应用和代理容器：
 
 ```bash
 docker compose up -d
@@ -70,7 +76,7 @@ docker compose up -d
 - HTTP：`http://192.168.0.111:26665`
 - HTTPS：`https://192.168.0.111:26666`
 
-`WEB_HTTP_PORT` 和 `WEB_HTTPS_PORT` 是监听端口，可按需修改；`TLS_HOST` 必须与浏览器地址栏使用的 NAS IP 或内网域名一致。单容器使用 host 网络，内置 Caddy 通过回环地址 `127.0.0.1:18080` 访问 Web；Agent 与 Web 不再需要跨容器通信。`APP_PORT` 可修改内部端口以避免 NAS 端口占用，三个端口必须不同。host 模式下不要再配置 Docker 端口映射。Linux NAS 上 host 网络使扫描模块能使用实际局域网网卡。
+`PUBLIC_HTTP_PORT` 和 `PUBLIC_HTTPS_PORT` 是代理容器的公开端口；`BACKEND_HTTP_PORT` 和 `BACKEND_HTTPS_PORT` 是 host 网络主容器的后端端口。`netwake` 仍必须使用 host 网络，以便扫描模块直接使用实际局域网网卡；`netwake-link` 负责端口映射，因此飞牛 Docker 界面中的可点击连接显示在 `netwake-link` 行。详细拓扑、约束和验收命令见 [PROXY_DEPLOYMENT.md](PROXY_DEPLOYMENT.md)。
 
 HTTPS 默认由 Caddy 内部 CA 签发证书，访问会加密，但浏览器/手机尚未信任该 CA 时会显示证书警告。要消除警告，需要把 Caddy 根证书导入并信任访问设备；证书保存在 Docker 卷 `caddy_data` 中。正式对外使用建议配置可信域名和受信任的证书。HTTP 与 HTTPS 两个入口都会保留，不会自动把 HTTP 重定向到 HTTPS。
 
