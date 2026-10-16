@@ -1,0 +1,32 @@
+services:
+  app:
+    image: ${LANWAKE_IMAGE:-azheng95/lanwake-hub:1.0.0}
+    container_name: lanwake-hub
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 15s
+    network_mode: host
+    cap_add:
+      - NET_RAW
+    cap_drop:
+      - ALL
+    environment:
+      DB_PATH: /data/lanwake.db
+      APP_TOKEN: ${APP_TOKEN:?Set APP_TOKEN in .env}
+      ALLOW_INITIAL_TOKEN_ENDPOINT: ${ALLOW_INITIAL_TOKEN_ENDPOINT:-false}
+      APP_PORT: ${APP_PORT:-18080}
+      WEB_BIND_ADDRESS: ${WEB_BIND_ADDRESS:-127.0.0.1}
+      WEB_HTTP_PORT: ${WEB_HTTP_PORT:-${WEB_PORT:-26665}}
+      WEB_HTTPS_PORT: ${WEB_HTTPS_PORT:-26666}
+      TLS_HOST: ${TLS_HOST:-192.168.0.111}
+      AGENT_NAME: ${AGENT_NAME:-home-lan-agent}
+      SCAN_INTERFACE: ${SCAN_INTERFACE:-}
+      DEFAULT_CIDR: ${DEFAULT_CIDR:-192.168.0.0/24}
+    volumes:
+      - ./data:/data
+      - caddy_data:/tls
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LanWake Hub</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div>
+          <h1>LanWake <span>设备管理</span></h1>
+        </div>
+        <div class="top-actions">
+          <label class="token-field" id="tokenField">
+            <span>管理令牌</span>
+            <input id="tokenInput" type="password" placeholder="输入管理令牌" autocomplete="off" />
+          </label>
+          <button class="icon-button help-button" id="tokenHelpButton" type="button" aria-label="查看令牌重置方法" title="令牌帮助">?</button>
+          <button class="button secondary" id="tokenButton">连接</button>
+          <button class="button ghost" id="refreshButton">刷新</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="page-heading">
+          <div class="section-title">
+            <h2>局域网设备</h2>
+            <span class="agent-status">
+            <span class="status-dot" id="agentDot"></span>
+            <div>
+              <strong id="agentName">Agent 检查中</strong>
+              <small id="agentMeta">等待连接</small>
+            </div>
+            </span>
+          </div>
+        </section>
+
+        <section class="toolbar">
+          <div class="field">
+            <label for="interfaceInput">扫描的局域网</label>
+            <select id="interfaceInput" aria-label="选择扫描的局域网">
+              <option value="">正在获取网卡...</option>
+            </select>
+          </div>
+          <button class="button primary" id="scanButton">扫描设备</button>
+          <button class="button secondary" id="addButton">添加设备</button>
+        </section>
+
+        <section class="stats-grid">
+          <div class="stat"><span>设备</span><strong id="totalCount">0</strong></div>
+          <div class="stat"><span>在线</span><strong id="onlineCount">0</strong></div>
+          <div class="stat"><span>WoL 已验证</span><strong id="wolCount">0</strong></div>
+          <div class="stat"><span>最近扫描</span><strong id="lastScan">未执行</strong></div>
+        </section>
+
+        <section class="content-grid">
+          <div class="devices-panel">
+            <div class="panel-heading">
+              <h3>设备清单</h3>
+              <select id="filterSelect" aria-label="设备筛选">
+                <option value="all">全部设备</option>
+                <option value="online">在线</option>
+                <option value="wol">已验证 WoL</option>
+              </select>
+            </div>
+            <div id="deviceList" class="device-list"></div>
+          </div>
+
+          <aside class="activity-panel">
+            <div class="panel-heading">
+              <h3>活动记录</h3>
+            </div>
+            <div id="activityList" class="activity-list"></div>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="initialTokenDialog" class="setup-dialog">
+      <div class="setup-content">
+        <div class="dialog-heading">
+          <div>
+            <h3>保存管理令牌</h3>
+            <p class="dialog-copy">这是首次打开时生成的管理令牌。请复制并保存在安全的位置，关闭此引导后页面不会再次显示。</p>
+          </div>
+        </div>
+        <label class="setup-token-label" for="initialTokenValue">管理令牌</label>
+        <div class="token-copy-row">
+          <input id="initialTokenValue" type="text" readonly autocomplete="off" spellcheck="false" />
+          <button class="button secondary" id="copyInitialTokenButton" type="button">复制</button>
+        </div>
+        <div class="dialog-actions">
+          <button class="button primary" id="confirmTokenSavedButton" type="button">我已保存，进入管理页</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="tokenHelpDialog" class="help-dialog">
+      <div class="setup-content">
+        <div class="dialog-heading">
+          <h3>管理令牌帮助</h3>
+          <button class="icon-button" id="closeTokenHelpButton" type="button" aria-label="关闭" title="关闭">×</button>
+        </div>
+        <p class="dialog-copy">本页面不能远程重置令牌。请在运行 Docker 的部署主机本地操作，修改项目 .env 中的 APP_TOKEN 为新的随机值（至少 32 个字符），再重建 Web 容器。</p>
+        <pre class="command-block">docker compose up -d --force-recreate app</pre>
+        <p class="dialog-copy">Windows 项目目录：<code>D:\DockerProjects\lanwake-hub</code><br />Linux / NAS：先进入项目目录，再执行上面的命令。</p>
+        <p class="dialog-copy">容器重启后，使用新令牌登录。</p>
+      </div>
+    </dialog>
+
+    <dialog id="deviceDialog">
+      <form method="dialog" id="deviceForm">
+        <div class="dialog-heading">
+          <div>
+            <h3 id="dialogTitle">添加设备</h3>
+          </div>
+          <button class="icon-button" type="button" data-close-dialog aria-label="关闭" title="关闭">×</button>
+        </div>
+        <input type="hidden" id="deviceId" />
+        <div class="form-grid">
+          <label>名称<input id="nameInput" required maxlength="120" /></label>
+          <label>MAC 地址<input id="macInput" required placeholder="AA:BB:CC:DD:EE:FF" /></label>
+        </div>
+        <details class="advanced-fields" id="advancedFields">
+          <summary>高级选项</summary>
+          <div class="form-grid">
+            <label>IP 地址<input id="ipInput" placeholder="192.168.0.101" /></label>
+            <label>广播地址<input id="broadcastInput" placeholder="自动使用扫描网段" /></label>
+            <label>WoL 状态<select id="wolStatusInput"><option value="unknown">未知</option><option value="verified">已验证</option><option value="unsupported">不支持</option></select></label>
+            <label>备注<textarea id="notesInput" rows="3"></textarea></label>
+          </div>
+        </details>
+        <div class="dialog-actions">
+          <button class="button ghost" type="button" data-close-dialog>取消</button>
+          <button class="button primary" id="saveDeviceButton" type="submit">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
